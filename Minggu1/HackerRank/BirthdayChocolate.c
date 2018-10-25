@@ -1,40 +1,39 @@
 #include <assert.h>
+#include <ctype.h>
 #include <limits.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 char* readline();
+char* ltrim(char*);
+char* rtrim(char*);
+char** split_string(char*);
 
-/*
- * Complete the gradingStudents function below.
- */
-
-/*
- * Please store the size of the integer array to be returned in result_count pointer. For example,
- * int a[3] = {1, 2, 3};
- *
- * *result_count = 3;
- *
- * return a;
- *
- */
-int* gradingStudents(int n, int* grades, int* result_count) {
-    *result_count = n;
-    int i ;
-    for (i=0;i<n;i++)
-    {
-        if (grades[i] >= 38) 
-        {
-            if ((5 - (grades[i]%5))<3)
-            {
-                grades[i] = grades[i] +(5 - (grades[i]%5));
-            }
+// Complete the birthday function below.
+int birthday(int s_count, int* s, int d, int m) {
+    
+    int i, sum1, sum2,co =0;
+    
+    int j,k=1,t=m,sum=0,count=0;
+    for(i=0;i<s_count;i++){
+        sum=s[i];
+        for(j=k;j<t;j++){
+            sum+=s[j];
         }
+        if(sum==d){
+            count++;
+        }
+        k++;
+        t++;
     }
-    return grades;
+    return count;
+       
+
 }
 
 int main()
@@ -42,35 +41,44 @@ int main()
     FILE* fptr = fopen(getenv("OUTPUT_PATH"), "w");
 
     char* n_endptr;
-    char* n_str = readline();
+    char* n_str = ltrim(rtrim(readline()));
     int n = strtol(n_str, &n_endptr, 10);
 
     if (n_endptr == n_str || *n_endptr != '\0') { exit(EXIT_FAILURE); }
 
-    int grades[n];
+    char** s_temp = split_string(rtrim(readline()));
 
-    for (int grades_itr = 0; grades_itr < n; grades_itr++) {
-        char* grades_item_endptr;
-        char* grades_item_str = readline();
-        int grades_item = strtol(grades_item_str, &grades_item_endptr, 10);
+    int* s = malloc(n * sizeof(int));
 
-        if (grades_item_endptr == grades_item_str || *grades_item_endptr != '\0') { exit(EXIT_FAILURE); }
+    for (int i = 0; i < n; i++) {
+        char* s_item_endptr;
+        char* s_item_str = *(s_temp + i);
+        int s_item = strtol(s_item_str, &s_item_endptr, 10);
 
-        grades[grades_itr] = grades_item;
+        if (s_item_endptr == s_item_str || *s_item_endptr != '\0') { exit(EXIT_FAILURE); }
+
+        *(s + i) = s_item;
     }
 
-    int result_count;
-    int* result = gradingStudents(n, grades, &result_count);
+    int s_count = n;
 
-    for (int result_itr = 0; result_itr < result_count; result_itr++) {
-        fprintf(fptr, "%d", result[result_itr]);
+    char** dm = split_string(rtrim(readline()));
 
-        if (result_itr != result_count - 1) {
-            fprintf(fptr, "\n");
-        }
-    }
+    char* d_endptr;
+    char* d_str = dm[0];
+    int d = strtol(d_str, &d_endptr, 10);
 
-    fprintf(fptr, "\n");
+    if (d_endptr == d_str || *d_endptr != '\0') { exit(EXIT_FAILURE); }
+
+    char* m_endptr;
+    char* m_str = dm[1];
+    int m = strtol(m_str, &m_endptr, 10);
+
+    if (m_endptr == m_str || *m_endptr != '\0') { exit(EXIT_FAILURE); }
+
+    int result = birthday(s_count, s, d, m);
+
+    fprintf(fptr, "%d\n", result);
 
     fclose(fptr);
 
@@ -86,25 +94,101 @@ char* readline() {
         char* cursor = data + data_length;
         char* line = fgets(cursor, alloc_length - data_length, stdin);
 
-        if (!line) { break; }
+        if (!line) {
+            break;
+        }
 
         data_length += strlen(cursor);
 
-        if (data_length < alloc_length - 1 || data[data_length - 1] == '\n') { break; }
+        if (data_length < alloc_length - 1 || data[data_length - 1] == '\n') {
+            break;
+        }
 
-        size_t new_length = alloc_length << 1;
-        data = realloc(data, new_length);
+        alloc_length <<= 1;
 
-        if (!data) { break; }
+        data = realloc(data, alloc_length);
 
-        alloc_length = new_length;
+        if (!data) {
+            data = '\0';
+
+            break;
+        }
     }
 
     if (data[data_length - 1] == '\n') {
         data[data_length - 1] = '\0';
+
+        data = realloc(data, data_length);
+
+        if (!data) {
+            data = '\0';
+        }
+    } else {
+        data = realloc(data, data_length + 1);
+
+        if (!data) {
+            data = '\0';
+        } else {
+            data[data_length] = '\0';
+        }
     }
 
-    data = realloc(data, data_length);
-
     return data;
+}
+
+char* ltrim(char* str) {
+    if (!str) {
+        return '\0';
+    }
+
+    if (!*str) {
+        return str;
+    }
+
+    while (*str != '\0' && isspace(*str)) {
+        str++;
+    }
+
+    return str;
+}
+
+char* rtrim(char* str) {
+    if (!str) {
+        return '\0';
+    }
+
+    if (!*str) {
+        return str;
+    }
+
+    char* end = str + strlen(str) - 1;
+
+    while (end >= str && isspace(*end)) {
+        end--;
+    }
+
+    *(end + 1) = '\0';
+
+    return str;
+}
+
+char** split_string(char* str) {
+    char** splits = NULL;
+    char* token = strtok(str, " ");
+
+    int spaces = 0;
+
+    while (token) {
+        splits = realloc(splits, sizeof(char*) * ++spaces);
+
+        if (!splits) {
+            return splits;
+        }
+
+        splits[spaces - 1] = token;
+
+        token = strtok(NULL, " ");
+    }
+
+    return splits;
 }
