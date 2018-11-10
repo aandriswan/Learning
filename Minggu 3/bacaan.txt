@@ -1,0 +1,7 @@
+Bacaan Untuk Buku  :
+
+1. Brian Kernighan and Dennis - The C Programming Language
+Bacaan sudah sampai dengan Bab 9
+
+2. Steven S. Skienna - The Algoritme Design Manual
+Bacaan Sudan Sampai dengan Bab 5
